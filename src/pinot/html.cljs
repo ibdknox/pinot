@@ -44,16 +44,22 @@
     c
     [c]))
 
+(defn dom-clone [elem]
+  (let [outer (dom/getOuterHtml elem)]
+    (dom/htmlToDocumentFragment outer)))
+
 ;;TODO: for a collection of elements it appends the same DOM
 ;; element to each one, causing it just to move around. Really
 ;; if it's a collection we should clone the html element(s) and
-;; append new ones to each of the items in elem
+;; append new ones to each of the items in elem. This, however,
+;; makes it impossible to keep track of an individual dom fragment
+;; for named view objects.
 (defn append-to [elem html]
   (let [elem (to-coll elem)
         html (to-coll html)]
     (doseq [el elem
             tag html]
-      (dom/appendChild el tag))))
+      (dom/appendChild el (dom-clone tag)))))
 
 (defn html [& tags]
   (map elem-factory tags))
