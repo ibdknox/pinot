@@ -64,6 +64,9 @@
 (defn find [q]
   (let [results (dom/query q)
         len (.length results)]
+    ;; The results are a nodelist, which looks like an array, but
+    ;; isn't one. We have to turn it into a collection that we can
+    ;; work with.
     (for [x (range 0 len)]
       (aget results x))))
 
