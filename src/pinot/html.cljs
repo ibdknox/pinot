@@ -43,12 +43,9 @@
 ;; In the JS console, goog.dom.createDom("a", {"id": "alink"}, "test2") works fine
 ;; Here, no.
 (defn create-dom
-  ([tag children]
-     (create-dom tag {} children))
-  ([tag attrs children]
-     (if (seq? children)
-       (dom/createDom (name tag) (.strobj attrs) (map #(apply create-dom %) children))
-       (dom/createDom (name tag) (.strobj attrs) children))))
+  ([tag attrs & children]
+     (apply dom/createDom (name tag) (pjs/map->js attrs) children)))
+
   
 
 (defn to-coll [c]
