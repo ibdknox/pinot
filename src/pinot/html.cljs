@@ -1,8 +1,8 @@
 (ns pinot.html
   (:require [goog.dom :as dom]
-            [goog.object :as gobj]
             [goog.dom.query :as query]
             [goog.events :as events]
+            [pinot.util.clj :as pclj]
             [pinot.util.js :as pjs]))
 
 (declare elem-factory)
@@ -30,7 +30,9 @@
 (defn parse-content [elem content]
   (let [attrs (first content)]
   (if (map? attrs)
-    (set-attributes elem attrs)
+    (do
+      (set-attributes elem attrs)
+      (rest content))
     content)))
 
 (defn elem-factory [[tag & body]]
@@ -49,7 +51,6 @@
      (if (seq? children)
        (dom/createDom (name tag) (.strobj attrs) (map #(apply create-dom %) children))
        (dom/createDom (name tag) (.strobj attrs) children))))
-  
 
 (defn to-coll [c]
   (if (coll? c)
@@ -76,23 +77,20 @@
 (defn html [& tags]
   (map elem-factory tags))
 
-(defn range [s e]
-  (take (- e s) (iterate inc s)))
-
 (defn dom-find [q]
   (let [results (dom/query q)
         len (.length results)]
     ;; The results are a nodelist, which looks like an array, but
     ;; isn't one. We have to turn it into a collection that we can
     ;; work with.
-    (for [x (range 0 len)]
+    (for [x (pclj/range 0 len)]
       (aget results x))))
 
 (def items (html [:li "test"]
                  [:li "cool"]
                  [:li "yay!"]))
 (append-to (dom-find "body") (html [:ul {:id "list"}]))
-(append-to (dom-find "body") (html [:a "button"]))
+(append-to (dom-find "body") (html [:a {:id "button"} "hey"]))
 (append-to (dom-find "#list") items)
 
 
