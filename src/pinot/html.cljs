@@ -1,8 +1,8 @@
 (ns pinot.html
-  (:referer :exclude [find])
   (:require [goog.dom :as dom]
             [goog.object :as gobj]
             [goog.dom.query :as query]
+            [goog.events :as events]
             [pinot.util.js :as pjs]))
 
 (declare elem-factory)
@@ -39,6 +39,15 @@
     (as-content elem content)
     elem))
 
+;; Not sure why attributes don't get propagated.
+;; In the JS console, goog.dom.createDom("a", {"id": "alink"}, "test2") works fine
+;; Here, no.
+(defn create-dom
+  ([tag children]
+     (create-dom tag {} children))
+  ([tag attrs children]
+     (dom/createDom tag attrs children))) 
+
 (defn to-coll [c]
   (if (coll? c)
     c
@@ -67,7 +76,7 @@
 (defn range [s e]
   (take (- e s) (iterate inc s)))
 
-(defn find [q]
+(defn dom-find [q]
   (let [results (dom/query q)
         len (.length results)]
     ;; The results are a nodelist, which looks like an array, but
@@ -76,9 +85,19 @@
     (for [x (range 0 len)]
       (aget results x))))
 
-
 (def items (html [:li "test"]
                  [:li "cool"]
                  [:li "yay!"]))
-(append-to (find "body") (html [:ul {:id "list"}]))
-(append-to (find "#list") items)
+(append-to (dom-find "body") (html [:ul {:id "list"}]))
+(append-to (dom-find "body") (html [:a {:id "button"}]
+(append-to (dom-find "#list") items)
+
+
+
+;;(dom/removeChildren (dom/getElement "list"))
+;;(append-to (dom/getElement "list") (html [:li "boo"]))
+
+;; Listen to the click event for "#button" and append a message to the body.
+(events/listen
+ (dom/getElement "button") events/EventType.CLICK,
+ (fn [] (append-to (dom-find "body") (html [:a "clicked!"]))))
