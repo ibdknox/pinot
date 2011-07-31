@@ -46,7 +46,10 @@
   ([tag children]
      (create-dom tag {} children))
   ([tag attrs children]
-     (dom/createDom tag attrs children))) 
+     (if (seq? children)
+       (dom/createDom (name tag) (.strobj attrs) (map #(apply create-dom %) children))
+       (dom/createDom (name tag) (.strobj attrs) children))))
+  
 
 (defn to-coll [c]
   (if (coll? c)
@@ -89,7 +92,7 @@
                  [:li "cool"]
                  [:li "yay!"]))
 (append-to (dom-find "body") (html [:ul {:id "list"}]))
-(append-to (dom-find "body") (html [:a {:id "button"}]
+(append-to (dom-find "body") (html [:a "button"]))
 (append-to (dom-find "#list") items)
 
 
@@ -97,7 +100,7 @@
 ;;(dom/removeChildren (dom/getElement "list"))
 ;;(append-to (dom/getElement "list") (html [:li "boo"]))
 
-;; Listen to the click event for "#button" and append a message to the body.
+;; Listen to the click event for "#button" [created manually] and append a message to the body.
 (events/listen
  (dom/getElement "button") events/EventType.CLICK,
  (fn [] (append-to (dom-find "body") (html [:a "clicked!"]))))
