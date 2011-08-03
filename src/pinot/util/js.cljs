@@ -5,3 +5,6 @@
     (doseq [[k v] m]
       (aset out (name k) v))
     out))
+
+(defn log [text]
+  (. (js* "console") (log text)))

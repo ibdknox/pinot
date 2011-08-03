@@ -1,9 +1,17 @@
 (ns pinot.html
   (:require [goog.dom :as dom]
-            [goog.dom.query :as query]
             [goog.events :as events]
+            [goog.style :as gstyle]
+            [goog.dom.query :as query]
+            [goog.dom.forms :as forms]
+            [clojure.string :as string]
             [pinot.util.clj :as pclj]
             [pinot.util.js :as pjs]))
+
+(defn ->coll [c]
+  (if (coll? c)
+    c
+    [c]))
 
 (declare elem-factory)
 
@@ -14,9 +22,29 @@
                   (map? c) (throw "Maps cannot be used as content")
                   (string? c) (dom/createTextNode c)
                   (vector? c) (elem-factory c)
-                  (coll? c) (as-content parent c))]
+                  ;;TODO: there's a bug in clojurescript that prevents seqs from
+                  ;; being considered collections
+                  (seq? c) (as-content parent c)
+                  (.nodeName c) c)]
       (when child
         (dom/appendChild parent child)))))
+
+;; From Weavejester's Hiccup: https://github.com/weavejester/hiccup/blob/master/src/hiccup/core.clj#L57
+(def ^{:doc "Regular expression that parses a CSS-style id and class from a tag name." :private true}
+  re-tag #"([^\s\.#]+)(?:#([^\s\.#]+))?(?:\.([^\s#]+))?")
+
+(defn- normalize-element
+  "Ensure a tag vector is of the form [tag-name attrs content]."
+  [[tag & content]]
+  (when (not (or (keyword? tag) (symbol? tag) (string? tag)))
+    (throw (str tag " is not a valid tag name.")))
+  (let [[_ tag id class] (re-matches re-tag (name tag))
+        tag-attrs        {:id (or id nil)
+                          :class (if class (string/replace class #"\." " "))}
+        map-attrs        (first content)]
+    (if (map? map-attrs)
+      [tag (merge tag-attrs map-attrs) (next content)]
+      [tag tag-attrs content])))
 
 (defn parse-tag [tag]
   (let [tag-str (name tag)]
@@ -24,20 +52,40 @@
     tag-str
   ))
 
-(defn set-attributes [elem attrs]
-  (dom/setProperties elem (pjs/map->js attrs)))
+(defn css [elem k & [v]]
+  (cond
+    (map? k) (doseq [[prop value] k]
+               (css elem prop value))
+    (nil? v) (gstyle/getStyle elem (name k))
+    :else (doseq [el (->coll elem)]
+            (gstyle/setStyle el (name k) (name v)))))
+
+(defn attr [elem attrs]
+  (if-not (map? attrs)
+    (aget elem (name attrs))
+    (doseq [el (->coll elem)]
+      (dom/setProperties el (pjs/map->js attrs)))))
+
+(defn val [elem & [v]]
+  (let [elem (if (seq elem)
+               (first elem)
+               elem)]
+    (if v
+      (forms/setValue elem v)
+      (forms/getValue elem))))
 
 (defn parse-content [elem content]
   (let [attrs (first content)]
   (if (map? attrs)
     (do
-      (set-attributes elem attrs)
+      (attr elem attrs)
       (rest content))
     content)))
 
-(defn elem-factory [[tag & body]]
-  (let [elem (dom/createElement (name tag))
-        content (parse-content elem body)]
+(defn elem-factory [tag-def]
+  (let [[tag attrs content] (normalize-element tag-def)
+        elem (dom/createElement tag)]
+    (attr elem attrs)
     (as-content elem content)
     elem))
 
@@ -48,10 +96,6 @@
   ([tag attrs & children]
      (apply dom/createDom (name tag) (pjs/map->js attrs) children)))
 
-(defn to-coll [c]
-  (if (coll? c)
-    c
-    [c]))
 
 (defn dom-clone [elem]
   (let [outer (dom/getOuterHtml elem)]
@@ -64,11 +108,13 @@
 ;; makes it impossible to keep track of an individual dom fragment
 ;; for named view objects.
 (defn append-to [elem html]
-  (let [elem (to-coll elem)
-        html (to-coll html)]
-    (doseq [el elem
-            tag html]
-      (dom/appendChild el (dom-clone tag)))))
+  (doseq [el (->coll elem)
+          tag (->coll html)]
+    (dom/appendChild el (dom-clone tag))))
+
+(defn unappend [elem]
+  (doseq [elem (->coll elem)]
+    (dom/removeNode elem)))
 
 (defn html [& tags]
   (map elem-factory tags))
@@ -79,22 +125,6 @@
     ;; The results are a nodelist, which looks like an array, but
     ;; isn't one. We have to turn it into a collection that we can
     ;; work with.
-    (for [x (pclj/range 0 len)]
+    (for [x (range 0 len)]
       (aget results x))))
 
-(def items (html [:li "test"]
-                 [:li "cool"]
-                 [:li "yay!"]))
-(append-to (dom-find "body") (html [:ul {:id "list"}]))
-(append-to (dom-find "body") (html [:a {:id "button"} "hey"]))
-(append-to (dom-find "#list") items)
-
-
-
-;;(dom/removeChildren (dom/getElement "list"))
-;;(append-to (dom/getElement "list") (html [:li "boo"]))
-
-;; Listen to the click event for "#button" [created manually] and append a message to the body.
-(events/listen
- (dom/getElement "button") events/EventType.CLICK,
- (fn [] (append-to (dom-find "body") (html [:a "clicked!"]))))

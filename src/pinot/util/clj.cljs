@@ -1,4 +1,7 @@
 (ns pinot.util.clj)
 
-(defn range [s e]
-  (take (- e s) (iterate inc s)))
+(defn ->coll [c]
+  (if (coll? c)
+    c
+    [c]))
+
