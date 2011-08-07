@@ -15,6 +15,8 @@ From any leiningen project file:
 ```
 Then make sure you have your lib folder on your classpath.
 
+If you are in a noir project, make sure to get [noir-cljs](https://github.com/ibdknox/noir-cljs) so you have your normal "make a change, refresh" workflow.
+
 ## Docs
 * Coming soon...
 
