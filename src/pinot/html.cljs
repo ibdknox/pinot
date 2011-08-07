@@ -8,12 +8,38 @@
             [pinot.util.clj :as pclj]
             [pinot.util.js :as pjs]))
 
-(defn ->coll [c]
-  (if (coll? c)
-    c
-    [c]))
+;; ********************************************
+;; Attribute manipulation
+;; ********************************************
+
+(defn css [elem k & [v]]
+  (cond
+    (map? k) (doseq [[prop value] k]
+               (css elem prop value))
+    (nil? v) (gstyle/getStyle elem (name k))
+    :else (doseq [el (pclj/->coll elem)]
+            (gstyle/setStyle el (name k) (name v)))))
+
+(defn attr [elem attrs]
+  (if-not (map? attrs)
+    (aget elem (name attrs))
+    (doseq [el (pclj/->coll elem)]
+      (dom/setProperties el (pjs/map->js attrs)))))
+
+(defn val [elem & [v]]
+  (let [elem (if (seq elem)
+               (first elem)
+               elem)]
+    (if v
+      (forms/setValue elem v)
+      (forms/getValue elem))))
+
+;; ********************************************
+;; Element creation via Hiccup-like vectors 
+;; ********************************************
 
 (declare elem-factory)
+(def elem-id (atom 0))
 
 (defn as-content [parent content]
   (doseq[c content]
@@ -46,33 +72,6 @@
       [tag (merge tag-attrs map-attrs) (next content)]
       [tag tag-attrs content])))
 
-(defn parse-tag [tag]
-  (let [tag-str (name tag)]
-    ;;TODO: handle cool tag names like :p#woot.cool
-    tag-str
-  ))
-
-(defn css [elem k & [v]]
-  (cond
-    (map? k) (doseq [[prop value] k]
-               (css elem prop value))
-    (nil? v) (gstyle/getStyle elem (name k))
-    :else (doseq [el (->coll elem)]
-            (gstyle/setStyle el (name k) (name v)))))
-
-(defn attr [elem attrs]
-  (if-not (map? attrs)
-    (aget elem (name attrs))
-    (doseq [el (->coll elem)]
-      (dom/setProperties el (pjs/map->js attrs)))))
-
-(defn val [elem & [v]]
-  (let [elem (if (seq elem)
-               (first elem)
-               elem)]
-    (if v
-      (forms/setValue elem v)
-      (forms/getValue elem))))
 
 (defn parse-content [elem content]
   (let [attrs (first content)]
@@ -84,22 +83,22 @@
 
 (defn elem-factory [tag-def]
   (let [[tag attrs content] (normalize-element tag-def)
-        elem (dom/createElement tag)]
-    (attr elem attrs)
+        elem (dom/createElement tag (pjs/map->js attrs))]
+    (attr elem {:pinotId (swap! elem-id inc)})
     (as-content elem content)
     elem))
 
-;; Not sure why attributes don't get propagated.
-;; In the JS console, goog.dom.createDom("a", {"id": "alink"}, "test2") works fine
-;; Here, no.
-(defn create-dom
-  ([tag attrs & children]
-     (apply dom/createDom (name tag) (pjs/map->js attrs) children)))
+(defn html [& tags]
+  (map elem-factory tags))
 
+;; ********************************************
+;; Dom interaction functions
+;; ********************************************
 
 (defn dom-clone [elem]
-  (let [outer (dom/getOuterHtml elem)]
-    (dom/htmlToDocumentFragment outer)))
+  (let [neue (. elem (cloneNode true))]
+    (attr neue {:pinotId (.pinotId elem)})
+    neue))
 
 ;;TODO: for a collection of elements it appends the same DOM
 ;; element to each one, causing it just to move around. Really
@@ -108,16 +107,14 @@
 ;; makes it impossible to keep track of an individual dom fragment
 ;; for named view objects.
 (defn append-to [elem html]
-  (doseq [el (->coll elem)
-          tag (->coll html)]
+  (doseq [el (pclj/->coll elem)
+          tag (pclj/->coll html)]
     (dom/appendChild el (dom-clone tag))))
 
 (defn unappend [elem]
-  (doseq [elem (->coll elem)]
+  (doseq [elem (pclj/->coll elem)]
     (dom/removeNode elem)))
 
-(defn html [& tags]
-  (map elem-factory tags))
 
 (defn dom-find [q]
   (let [results (dom/query q)
@@ -127,4 +124,3 @@
     ;; work with.
     (for [x (range 0 len)]
       (aget results x))))
-
