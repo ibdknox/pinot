@@ -27,10 +27,10 @@ Remotes let you make calls to a noir server without having to think about XHR. O
             [pinot.remotes :as remotes])
   (:require-macros [pinot.macros :as pm]))
 
-(mac/remote (adder 2 5 6) [result]
+(pm/remote (adder 2 5 6) [result]
   (js/alert result))
 
-(mac/remote (get-user 2) [{:keys [username age]}]
+(pm/remote (get-user 2) [{:keys [username age]}]
   (js/alert (str "Name: " username ", Age: " age)))
 ```
 
