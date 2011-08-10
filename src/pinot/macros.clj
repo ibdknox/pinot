@@ -13,3 +13,13 @@
   [name & fdecl]
   `(let [func# (fn ~@fdecl)]
     (def ~name (pinot.html.tags/add-optional-attrs func#))))
+
+(defmacro remote
+  [[sym & params] & [destruct & body]]
+  (let [func# (if destruct
+                `(fn ~destruct ~@body)
+                nil)]
+    `(pinot.remotes/remote-callback ~(name sym)
+                                    ~(vec params)
+                                    ~func#)))
+

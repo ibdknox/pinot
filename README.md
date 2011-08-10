@@ -17,6 +17,42 @@ Then make sure you have your lib folder on your classpath.
 
 If you are in a noir project, make sure to get [noir-cljs](https://github.com/ibdknox/noir-cljs) so you have your normal "make a change, refresh" workflow.
 
+###remotes
+
+Remotes let you make calls to a noir server without having to think about XHR. On the client-side you simply have code that looks like this:
+
+```clojure
+(ns playground.client.test
+  (:require [pinot.html :as html]
+            [pinot.remotes :as remotes])
+  (:require-macros [pinot.macros :as pm]))
+
+(mac/remote (adder 2 5 6) [result]
+  (js/alert result))
+
+(mac/remote (get-user 2) [{:keys [username age]}]
+  (js/alert (str "Name: " username ", Age: " age)))
+```
+
+Note that the results we get are real Clojure datastructures and so we use them just as we would in normal Clojure code. No JSON here.
+
+The noir side of things is just as simple. All you do is declare a remote using defremote.
+
+```clojure
+(use 'noir.pinot.remotes)
+
+(defremote adder [& nums]
+           (apply + nums))
+
+(defremote get-user [id]
+           {:username "Chris"
+            :age 24})
+
+(server/add-middleware pinot/wrap-remotes)
+
+(server/start 8080)
+```
+
 ## Docs
 * Coming soon...
 
