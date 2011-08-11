@@ -32,6 +32,11 @@ Remotes let you make calls to a noir server without having to think about XHR. O
 
 (pm/remote (get-user 2) [{:keys [username age]}]
   (js/alert (str "Name: " username ", Age: " age)))
+
+;;Also just added letrem
+(pm/letrem [a (adder 3 4)
+            b (adder 5 6)]
+    (js/alert (str "a: " a " b: " b)))
 ```
 
 Note that the results we get are real Clojure datastructures and so we use them just as we would in normal Clojure code. No JSON here.
