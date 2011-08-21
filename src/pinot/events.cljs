@@ -4,7 +4,7 @@
             [pinot.html :as html]
             [clojure.string :as string]))
 
-(defn body (atom nil))
+(def body (atom nil))
 
 (defn get-body []
   (if-not @body
