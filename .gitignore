@@ -6,3 +6,4 @@ pom.xml
 .lein-failures
 autodoc/
 docs/
+resources/public/cljs

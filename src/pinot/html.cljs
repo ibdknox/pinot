@@ -84,7 +84,7 @@
 (defn elem-factory [tag-def]
   (let [[tag attrs content] (normalize-element tag-def)
         elem (dom/createElement tag (pjs/map->js attrs))]
-    (attr elem {:pinotId (swap! elem-id inc)})
+    (attr elem {:pinot-id (swap! elem-id inc)})
     (as-content elem content)
     elem))
 
@@ -95,9 +95,15 @@
 ;; Dom interaction functions
 ;; ********************************************
 
+(defn parent [elem]
+  (.parentNode elem))
+
+(defn is-dom? [elem]
+  (dom/isNodeLike elem))
+
 (defn dom-clone [elem]
   (let [neue (. elem (cloneNode true))]
-    (attr neue {:pinotId (.pinotId elem)})
+    (attr neue {:pinot-id (.pinotId elem)})
     neue))
 
 ;;TODO: for a collection of elements it appends the same DOM

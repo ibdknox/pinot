@@ -2,9 +2,13 @@
 
 (defmacro defpartial
   [name params & body]
-  `(defn ~name ~params
-     (pinot.html/html
-       ~@body)))
+  `(let [group# (swap! inc pinot.html/group-counter)]
+     (defn ^{:pinot-group group#} 
+       ~name ~params
+       (pinot.html/attr 
+         (pinot.html/html
+           ~@body)
+         {:pinot-group group#}))))
 
 (defmacro defelem
   "Defines a function that will return a tag vector. If the first argument
