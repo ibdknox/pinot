@@ -22,9 +22,12 @@
 
 (defn attr [elem attrs]
   (if-not (map? attrs)
-    (aget elem (name attrs))
-    (doseq [el (pclj/->coll elem)]
-      (dom/setProperties el (pjs/map->js attrs)))))
+    (. elem (getAttribute (name attrs)))
+    (do
+      (doseq [el (pclj/->coll elem)
+              [k v] attrs]
+        (. el (setAttribute (name k) v)))
+      elem)))
 
 (defn val [elem & [v]]
   (let [elem (if (seq elem)
@@ -40,6 +43,7 @@
 
 (declare elem-factory)
 (def elem-id (atom 0))
+(def group-id (atom 0))
 
 (defn as-content [parent content]
   (doseq[c content]
@@ -84,7 +88,7 @@
 (defn elem-factory [tag-def]
   (let [[tag attrs content] (normalize-element tag-def)
         elem (dom/createElement tag (pjs/map->js attrs))]
-    (attr elem {:pinot-id (swap! elem-id inc)})
+    (attr elem {:pinotId (swap! elem-id inc)})
     (as-content elem content)
     elem))
 
@@ -103,7 +107,6 @@
 
 (defn dom-clone [elem]
   (let [neue (. elem (cloneNode true))]
-    (attr neue {:pinot-id (.pinotId elem)})
     neue))
 
 ;;TODO: for a collection of elements it appends the same DOM

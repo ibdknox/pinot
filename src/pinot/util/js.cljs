@@ -7,4 +7,4 @@
     out))
 
 (defn log [text]
-  (. (js* "console") (log text)))
+  (. js/console (log text)))

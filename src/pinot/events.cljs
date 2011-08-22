@@ -1,6 +1,7 @@
 (ns pinot.events
   (:require [goog.events :as events]
             [pinot.util.clj :as pclj]
+            [pinot.util.js :as pjs]
             [pinot.html :as html]
             [clojure.string :as string]))
 
@@ -14,19 +15,19 @@
 ;;TODO: this is ugly.
 (defn ->target [elem]
   (cond
-    (fn? elem) {:group-id (:pinot-group (meta elem))}
-    (html/attr elem :pinot-id) {:elem elem :pinot-id (html/attr elem :pinot-id)}
+    (fn? elem) {:pinotGroup (html/attr (first (elem)) :pinotGroup)}
+    (html/attr elem :pinotId) {:elem elem :pinotId (html/attr elem :pinotId)}
     :else {:elem elem }))
 
-(defn match? [{:keys [elem group-id pinot-id]} init-target]
+(defn match? [{:keys [elem pinotGroup pinotId]} init-target]
   (loop [target init-target]
-    (let [target-group (html/attr target :group-id)
-          target-pinot (html/attr target :pinot-id)]
+    (let [target-group (html/attr target :pinotGroup)
+          target-pinot (html/attr target :pinotId)]
       (when (not= target (html/parent (get-body)))
         (if (or
               (and elem (= elem target))
-              (and group-id (= group-id target-group))
-              (and pinot-id (= pinot-id target-pinot)))
+              (and pinotGroup (= pinotGroup target-group))
+              (and pinotId (= pinotId target-pinot)))
           target
           (recur (html/parent target)))))))
 
