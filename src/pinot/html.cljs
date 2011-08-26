@@ -8,6 +8,9 @@
             [pinot.util.clj :as pclj]
             [pinot.util.js :as pjs]))
 
+(def xmlns {:xhtml "http://www.w3.org/1999/xhtml"
+            :svg "http://www.w3.org/2000/svg"})
+
 ;; ********************************************
 ;; Attribute manipulation
 ;; ********************************************
@@ -18,23 +21,35 @@
                (css elem prop value))
     (nil? v) (gstyle/getStyle elem (name k))
     :else (doseq [el (pclj/->coll elem)]
-            (gstyle/setStyle el (name k) (name v)))))
+            (gstyle/setStyle el (name k) (name v))))
+  elem)
 
-(defn attr [elem attrs]
-  (if-not (map? attrs)
-    (. elem (getAttribute (name attrs)))
-    (do
-      (doseq [el (pclj/->coll elem)
-              [k v] attrs]
-        (. el (setAttribute (name k) v)))
-      elem)))
+(defn attr 
+  ([elem attrs]
+   (if-not (map? attrs)
+     (. elem (getAttribute (name attrs)))
+     (do
+       (doseq [[k v] attrs]
+         (attr elem k v))
+       elem)))
+  ([elem k v]
+   (doseq [el (pclj/->coll elem)]
+     (. el (setAttribute (name k) v)))
+   elem))
+
+(defn text [elem v]
+  (doseq [el (pclj/->coll elem)]
+    (dom/setTextContent el v))
+  elem)
 
 (defn val [elem & [v]]
   (let [elem (if (seq elem)
                (first elem)
                elem)]
     (if v
-      (forms/setValue elem v)
+      (do 
+        (forms/setValue elem v)
+        elem)
       (forms/getValue elem))))
 
 ;; ********************************************
@@ -69,12 +84,19 @@
   (when (not (or (keyword? tag) (symbol? tag) (string? tag)))
     (throw (str tag " is not a valid tag name.")))
   (let [[_ tag id class] (re-matches re-tag (name tag))
-        tag-attrs        {:id (or id nil)
-                          :class (if class (string/replace class #"\." " "))}
+        [nsp tag]     (let [[nsp t] (string/split tag #":")
+                               ns-xmlns (xmlns (keyword nsp))]
+                           (if t
+                             [(or ns-xmlns nsp) t]
+                             [(:xhtml xmlns) t]))
+        tag-attrs        (into {} 
+                               (filter #(not (nil? (second %)))
+                                       {:id (or id nil)
+                                        :class (if class (string/replace class #"\." " "))}))
         map-attrs        (first content)]
     (if (map? map-attrs)
-      [tag (merge tag-attrs map-attrs) (next content)]
-      [tag tag-attrs content])))
+      [nsp tag (merge tag-attrs map-attrs) (next content)]
+      [nsp tag tag-attrs content])))
 
 
 (defn parse-content [elem content]
@@ -85,10 +107,13 @@
       (rest content))
     content)))
 
+(defn create-elem [nsp tag]
+  (. js/document (createElementNS nsp tag)))
+
 (defn elem-factory [tag-def]
-  (let [[tag attrs content] (normalize-element tag-def)
-        elem (dom/createElement tag (pjs/map->js attrs))]
-    (attr elem {:pinotId (swap! elem-id inc)})
+  (let [[nsp tag attrs content] (normalize-element tag-def)
+        elem (create-elem nsp tag)]
+    (attr elem (merge attrs {:pinotId (swap! elem-id inc)}))
     (as-content elem content)
     elem))
 
@@ -98,6 +123,11 @@
 ;; ********************************************
 ;; Dom interaction functions
 ;; ********************************************
+
+(defn pinot-group [func]
+  (when (fn? func)
+    (let [elem (func)]
+      (attr (first elem) :pinotGroup))))
 
 (defn parent [elem]
   (.parentNode elem))
@@ -124,12 +154,16 @@
   (doseq [elem (pclj/->coll elem)]
     (dom/removeNode elem)))
 
-
-(defn dom-find [q]
-  (let [results (dom/query q)
-        len (.length results)]
+(defn nodelist->coll [nl]
     ;; The results are a nodelist, which looks like an array, but
     ;; isn't one. We have to turn it into a collection that we can
     ;; work with.
-    (for [x (range 0 len)]
-      (aget results x))))
+  (for [x (range 0 (.length nl))]
+    (aget nl x)))
+
+(defn dom-find [query]
+  (let [q (if (fn? query)
+            (str "[pinotGroup$=" (pinot-group query) "]")
+            query)
+        results (dom/query q)]
+    (nodelist->coll results)))

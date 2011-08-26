@@ -8,3 +8,6 @@
 
 (defn log [text]
   (. js/console (log text)))
+
+(defn as-int [n]
+  (js/parseInt n))
