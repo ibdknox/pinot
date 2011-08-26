@@ -110,7 +110,9 @@ The noir side of things is just as simple. All you do is declare a remote using 
 
 ###Visualization
 
-```Clojure
+Pinot also includes a set of functions for creating visualizations in the style of [D3](https://github.com/mbostock/d3).
+
+```clojure
 (ns playground.client.test
   (:require [pinot.html :as html]
             [pinot.visual :as vis])
