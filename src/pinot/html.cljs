@@ -88,7 +88,7 @@
                                ns-xmlns (xmlns (keyword nsp))]
                            (if t
                              [(or ns-xmlns nsp) t]
-                             [(:xhtml xmlns) t]))
+                             [(:xhtml xmlns) nsp]))
         tag-attrs        (into {} 
                                (filter #(not (nil? (second %)))
                                        {:id (or id nil)
