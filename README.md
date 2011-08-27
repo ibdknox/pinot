@@ -52,7 +52,7 @@ Events can also take advantage of partials
 ```clojure
 (ns playground.client.test
   (:require [pinot.html :as html]
-            [pinot.events :as pe]))
+            [pinot.events :as events]))
 
 (events/on (html/dom-find "li") :click
            (fn [me e]
