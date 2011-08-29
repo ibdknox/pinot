@@ -18,7 +18,7 @@
   (if-let [func (get-remote remote)]
     (let [result (apply func params)]
       {:status 202
-       :headers {"ContentType" "application/clojure"}
+       :headers {"Content-Type" "application/clojure; charset=utf-8"}
        :body (pr-str result)})
     {:status 404}))
 
