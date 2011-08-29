@@ -5,7 +5,7 @@ Pinot is a ClojureScript client-side framework designed to make it easy to write
 
 Currently Pinot provides a wrapper over several DOM interaction points in the goog.\* libraries. It also provides an implementation of [Hiccup](https://github.com/weavejester/hiccup) that translates directly into DOM objects instead of a string of HTML.
 
-For an example look at the src/todos/core.cljs
+For an example look at the examples/todo.cljs
 
 ##Usage
 From any leiningen project file:
@@ -15,7 +15,7 @@ From any leiningen project file:
 ```
 Then make sure you have your lib folder on your classpath.
 
-If you are in a noir project, make sure to get [noir-cljs](https://github.com/ibdknox/noir-cljs) so you have your normal "make a change, refresh" workflow.
+For the best development experience, try out [cljs-watch](https://github.com/ibdknox/cljs-watch). If you do, you'll need to replace the goog.jar in your CLOJURESCRIPT_HOME/lib with the goog-jar.jar that comes down as a dependency with pinot.
 
 ###Dom manipulation
 
