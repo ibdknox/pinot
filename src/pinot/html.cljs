@@ -43,7 +43,7 @@
   elem)
 
 (defn val [elem & [v]]
-  (let [elem (if (seq elem)
+  (let [elem (if (coll? elem)
                (first elem)
                elem)]
     (if v
