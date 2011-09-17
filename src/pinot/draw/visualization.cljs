@@ -1,5 +1,7 @@
-(ns pinot.visual
+(ns pinot.draw.visualization
   (:require [pinot.html :as html]
+            [pinot.dom :as dom]
+            [pinot.draw.core :as draw]
             [pinot.util.js :as pjs]))
 
 (defn visual [data]
@@ -17,7 +19,7 @@
     (let [v (if (fn? v)
               (v d idx)
               v)]
-      (html/attr elem k v))))
+      (dom/attr elem k v))))
 
 (defn create-elem [elem d idx]
   (cond 
@@ -33,7 +35,7 @@
       (method cur))))
 
 (defn select [query]
-  (html/dom-find query))
+  (dom/query query))
 
 (defn data [vis d]
   (assoc vis :data d))
@@ -42,26 +44,18 @@
   {:elems elems
    :dur dur})
 
-(def animation-frame 
-  (or (.requestAnimationFrame js/window)
-      (.webkitRequestAnimationFrame js/window)
-      (.mozRequestAnimationFrame js/window)
-      (.oRequestAnimationFrame js/window)
-      (.msRequestAnimationFrame js/window)
-      (fn [callback] (js/setTimeout callback 17))))
-
 (defn do-animation [{:keys [start-time dur tween] :as anim}]
   (let [now (. js/Date (now))
         elapsed (min (/ (- now start-time) dur) 1)]
     (tween elapsed)
     (when-not (= elapsed 1)
-      (animation-frame (partial do-animation anim)))))
+      (draw/animation-frame (partial do-animation anim)))))
 
 (defn end-states [elems attr data]
   (for [[el d] (map list elems data)]
     (for [[k v] attr]
       (let [v (if (fn? v) (v d) v)
-            init (pjs/as-int (html/attr el k))
+            init (pjs/as-int (dom/attr el k))
             delta (- v init)]
         [k init delta]))))
 
@@ -73,7 +67,7 @@
               [k init delta] attrs]
         (let [elapsed-delta (* elapsed-perc delta)
               change (+ init elapsed-delta)]
-          (html/attr el k change))))))
+          (dom/attr el k change))))))
   
 (defn start [{:keys [dur] :as transition}]
   (let [now (. js/Date (now))]

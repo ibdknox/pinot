@@ -5,7 +5,7 @@
   `(let [group# (swap! pinot.html/group-id inc)]
      (defn ^{:pinotGroup group#} 
        ~name ~params
-       (pinot.html/attr 
+       (pinot.dom/attr 
          (pinot.html/html
            ~@body)
          {:pinotGroup group#}))))
