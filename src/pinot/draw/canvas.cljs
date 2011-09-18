@@ -31,11 +31,38 @@
   (. ctx (clearRect x y w h))
   ctx)
 
-(defn rect [ctx {:keys [x y w h]}]
-  (begin-path ctx)
-  (. ctx (rect x y w h))
-  (close-path ctx)
-  (fill ctx)
+(defn rounded-rect [ctx {:keys [x y w h radius]}]
+  (let [r2d (/ Math/PI 180)]
+    (begin-path ctx)
+
+    (. ctx (moveTo (+ x radius) y))
+    (. ctx (lineTo (- w radius) y))
+    (. ctx (arc (- w radius) (+ y radius) radius (* r2d 270) (* r2d 360) false))
+    (. ctx (lineTo w (- h radius)))
+    (. ctx (arc (- w radius) (- h radius) radius (* r2d 0) (* r2d 90) false))
+    (. ctx (lineTo (+ x radius) h))
+    (. ctx (arc (+ x radius) (- h radius) radius (* r2d 90) (* r2d 180) false))
+    (. ctx (lineTo x (+ y radius)))
+    (. ctx (arc (+ x radius) (+ y radius) radius (* r2d 180) (* r2d 270) false))
+
+    (close-path ctx)
+    ctx))
+
+(defn rect [ctx {:keys [x y w h radius] :as settings}]
+  (if (and radius (< 0 radius))
+    (rounded-rect ctx settings)
+    (do (begin-path ctx)
+        (. ctx (rec t x y w h))
+        (close-path ctx)))
+  ctx)
+
+(defn fill-rect [ctx settings color]
+  (-> ctx 
+      (save)
+      (rect settings)
+      (fill-style color)
+      (fill)
+      (restore))
   ctx)
 
 (defn circle [ctx {:keys [x y r]}]
