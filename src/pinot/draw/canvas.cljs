@@ -52,7 +52,7 @@
   (if (and radius (< 0 radius))
     (rounded-rect ctx settings)
     (do (begin-path ctx)
-        (. ctx (rec t x y w h))
+        (. ctx (rect x y w h))
         (close-path ctx)))
   ctx)
 
@@ -98,6 +98,21 @@
 (defn alpha [ctx a]
   (set! ctx.globalAlpha a)
   ctx)
+
+(defn rotate 
+  "Applies a rotate using the center derived from x y w h.
+   Callers should save the context, apply rotate, draw
+   the items to be rotated, and then restore the context."
+  [ctx {:keys [x y w h]} angle]
+  (let [centerx (+ x (/ w 2))
+        centery (+ y (/ h 2))]
+    (. ctx (translate centerx centery))
+    (. ctx (rotate (* (/ Math/PI 180) angle)))
+    
+    ; performing the inverse translate so that the point is at
+    ; the correct starting point when items are drawn.
+    (. ctx (translate (* centerx -1) (* centery -1)))
+    ctx))
 
 (defn save [ctx]
   (. ctx (save))
