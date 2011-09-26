@@ -33,16 +33,17 @@
                   [:ul 
                     (map todo-item @todos)]]))
 
-(pe/on (dom/query "#todoForm") :submit 
+(pe/on todo-form :submit 
        (fn [me e]
          (let [text (dom/val (dom/query "#todoText"))
                neue (add-todo text)]
            (dom/append (dom/query "ul") (todo-item neue))
            (pe/prevent e))))
 
-(pe/on (dom/query "a.remove") :click
+(pe/on todo-item :click
        (fn [me e]
          (let [id (dom/attr me :id)]
            (remove-todo id)
            (dom/unappend me)
            (pe/prevent e))))
+
