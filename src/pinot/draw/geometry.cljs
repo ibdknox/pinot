@@ -22,13 +22,23 @@
 ;; Bounding functions
 ;;**************************************************
 
-(defn bottom-right [{:keys [x y w h]}]
-  {:x (+ x (/ w 2))
-   :y (+ y (/ h 2))})
+(defn bottom-right [{:keys [x y w h r]}]
+  ;;Account for circles whose x and y represent the center
+  ;;instead of the top left
+  (if r
+    {:x (+ x (/ w 2))
+     :y (+ y (/ h 2))}
+    {:x (+ x w)
+     :y (+ y h)}))
 
-(defn top-left [{:keys [x y w h]}]
-  {:x (- x (/ w 2))
-   :y (- y (/ h 2))})
+(defn top-left [{:keys [x y w h r]}]
+  ;;Account for circles whose x and y represent the center
+  ;;instead of the top left
+  (if r
+    {:x (- x (/ w 2))
+     :y (- y (/ h 2))}
+    {:x x
+     :y y}))
 
 (defn in-radius? [origin obj radius]
   (let [{:keys [dist]} (distance origin obj)]
