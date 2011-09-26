@@ -1,7 +1,7 @@
 (ns todo.core
   (:require [pinot.html :as ph]
             [pinot.html.tags :as tags]
-            [pinot.validation :as vali]
+            [pinot.dom :as dom]
             [pinot.events :as pe])
   (:require-macros [pinot.macros :as pm]))
 
@@ -26,23 +26,23 @@
                      (tags/text-field "todoText")
                      (tags/submit-button {:class "submit"} "add todo")))
 
-(ph/append-to (ph/dom-find "body")
+(dom/append (dom/query "body")
               (ph/html
                 [:div
                   (todo-form)
                   [:ul 
                     (map todo-item @todos)]]))
 
-(pe/on (ph/dom-find "#todoForm") :submit 
+(pe/on (dom/query "#todoForm") :submit 
        (fn [me e]
-         (let [text (ph/val (ph/dom-find "#todoText"))
+         (let [text (dom/val (dom/query "#todoText"))
                neue (add-todo text)]
-           (ph/append-to (ph/dom-find "ul") (todo-item neue))
+           (dom/append (dom/query "ul") (todo-item neue))
            (pe/prevent e))))
 
-(pe/on (ph/dom-find "a.remove") :click
+(pe/on (dom/query "a.remove") :click
        (fn [me e]
-         (let [id (ph/attr me :id)]
+         (let [id (dom/attr me :id)]
            (remove-todo id)
-           (ph/unappend me)
+           (dom/unappend me)
            (pe/prevent e))))

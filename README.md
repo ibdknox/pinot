@@ -23,14 +23,15 @@ Pinot includes a basic set of dom interaction pieces, including an implementatio
 
 ```clojure
 (ns client.test
-  (:require [pinot.html :as html])
+  (:require [pinot.html :as html]
+            [pinot.dom :as dom])
   (:require-macros [pinot.macros :as pm]))
 
 (def x (html/html [:p [:em "hey"]]))
-(html/css x {:color :blue})
-(html/attr x {:class "para"})
-(html/val (html/dom-find "input"))
-(html/append-to (html/dom-find "#content div.body") x)
+(dom/css x {:color :blue})
+(dom/attr x {:class "para"})
+(dom/val (dom/query "input"))
+(dom/append (dom/query "#content div.body") x)
 ```
 
 Pinot also includes `(defpartial)` like in Noir, however Pinot derives even greater advantage from it:
@@ -42,7 +43,7 @@ Pinot also includes `(defpartial)` like in Noir, however Pinot derives even grea
    [:span {:class (when done? "done")}]])
 
 ;;You can pass the partial function to dom-find to find all the todos.
-(def all-todos (html/dom-find todo))
+(def all-todos (dom/query todo))
 ```
 
 ###Events
@@ -51,19 +52,19 @@ Events can also take advantage of partials
 
 ```clojure
 (ns playground.client.test
-  (:require [pinot.html :as html]
+  (:require [pinot.dom :as dom]
             [pinot.events :as events]))
 
-(events/on (html/dom-find "li") :click
+(events/on (dom/query "li") :click
            (fn [me e]
-             (html/css me {:background :blue})
+             (dom/css me {:background :blue})
              (events/prevent e)))
 
 ;; Partials can also be passed here, allowing you to add an event to every
 ;; element created through that partial.
 (events/on todo :click
            (fn [me e]
-             (html/css me {:background :blue})
+             (dom/css me {:background :blue})
              (events/prevent e)))
 ```
 
@@ -73,8 +74,7 @@ Remotes let you make calls to a noir server without having to think about XHR. O
 
 ```clojure
 (ns playground.client.test
-  (:require [pinot.html :as html]
-            [pinot.remotes :as remotes])
+  (:require [pinot.remotes :as remotes])
   (:require-macros [pinot.macros :as pm]))
 
 (pm/remote (adder 2 5 6) [result]
@@ -114,7 +114,7 @@ Pinot also includes a set of functions for creating visualizations in the style 
 
 ```clojure
 (ns playground.client.test
-  (:require [pinot.html :as html]
+  (:require [pinot.dom :as dom]
             [pinot.visual :as vis])
   (:require-macros [pinot.macros :as mac]))
 
@@ -127,7 +127,7 @@ Pinot also includes a set of functions for creating visualizations in the style 
 (mac/defpartial item [x]
                 [:svg:circle {:r (* 2 x)}])
 
-(html/append-to (html/dom-find "#wrapper")
+(dom/append (dom/query "#wrapper")
                 (canvas))
 
 (-> (vis/visual items)
@@ -136,7 +136,7 @@ Pinot also includes a set of functions for creating visualizations in the style 
   (vis/attr :fill "#777")
   (vis/attr :cx #(+ 20 (rand-int 800)))
   (vis/attr :cy #(+ 80 (* 10 (mod % 4))))
-  (vis/enter (partial html/append-to (html/dom-find "svg"))))
+  (vis/enter (partial dom/append (dom/query "svg"))))
 
 (-> (vis/select item)
   (vis/transition 500)
