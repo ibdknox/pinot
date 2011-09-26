@@ -24,7 +24,7 @@
   [:input {:type tpe
            :name (or nme nil)
            :id (or nme nil)
-           :value (or value nil)}])
+           :value (or value "")}])
 
 (pm/defelem text-field [nme value]
   (input-field "text" nme value))
