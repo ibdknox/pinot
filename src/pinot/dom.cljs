@@ -4,6 +4,7 @@
             [goog.style :as gstyle]
             [goog.dom.query :as query]
             [goog.dom.forms :as forms]
+            [good.dom.classes :as classes]
             [pinot.util.clj :as pclj]
             [pinot.util.js :as pjs])
   (:refer-clojure :exclude [replace]))
@@ -29,6 +30,9 @@
     :else (doseq [el (pclj/->coll elem)]
             (gstyle/setStyle el (name k) (name v))))
   elem)
+
+(defn toggle-class [elem class]
+  (classes/toggle elem class))
 
 (defn attr 
   ([elem attrs]
