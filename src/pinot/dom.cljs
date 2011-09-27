@@ -5,7 +5,8 @@
             [goog.dom.query :as query]
             [goog.dom.forms :as forms]
             [pinot.util.clj :as pclj]
-            [pinot.util.js :as pjs]))
+            [pinot.util.js :as pjs])
+  (:refer-clojure :exclude [replace]))
 
 ;; ********************************************
 ;; Pinot specific
@@ -84,6 +85,12 @@
 (defn unappend [elem]
   (doseq [elem (pclj/->coll elem)]
     (dom/removeNode elem)))
+
+(defn replace [elem html]
+  (let [p (parent (if (coll? elem) (first elem) elem))]
+    (unappend elem)
+    (append p html)))
+
 
 (defn nodelist->coll [nl]
     ;; The results are a nodelist, which looks like an array, but
