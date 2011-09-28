@@ -21,15 +21,23 @@
 
 (defn match? [{:keys [elem pinotGroup pinotId]} init-target]
   (loop [target init-target]
-    (let [target-group (dom/attr target :pinotGroup)
-          target-pinot (dom/attr target :pinotId)]
-      (when (not= target (dom/parent (get-body)))
-        (if (or
-              (and elem (= elem target))
-              (and pinotGroup (= pinotGroup target-group))
-              (and pinotId (= pinotId target-pinot)))
-          target
-          (recur (dom/parent target)))))))
+    (when target
+      (let [target-group (dom/attr target :pinotGroup)
+            target-pinot (dom/attr target :pinotId)]
+        (when (not= target (dom/parent (get-body)))
+          (if (or
+                (and elem (= elem target))
+                (and pinotGroup (= pinotGroup target-group))
+                (and pinotId (= pinotId target-pinot)))
+            target
+            (recur (dom/parent target))))))))
+
+(defn make-listener [func parsed]
+  (fn [e]
+    (let [target (.target e)]
+      (if-let [match (match? parsed target)]
+        (func match e)
+        true))))
 
 (defn on [elem event func]
   (let [ev-name (string/upper-case (name event))
@@ -37,13 +45,10 @@
         body-elem (get-body)]
     (doseq [el (pclj/->coll elem)]
       (let [parsed (->target el)]
+        (pjs/log parsed)
         (events/listen body-elem
                        event
-                       (fn [e]
-                         (let [target (.target e)]
-                           (if-let [match (match? parsed target)]
-                             (func match e)
-                             true))))))
+                       (make-listener func parsed))))
     elem))
 
 (defn prevent [e]

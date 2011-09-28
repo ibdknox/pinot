@@ -1,8 +1,6 @@
 (ns pinot.html.tags
   (:require-macros [pinot.macros :as pm]))
 
-;;TODO: this needs to handle extra attributes
-
 ;; From Weavejester's Hiccup: https://github.com/weavejester/hiccup/blob/master/src/hiccup/core.clj#L284
 (defn add-optional-attrs
   "Add an optional attribute argument to a function that returns a vector tag."
