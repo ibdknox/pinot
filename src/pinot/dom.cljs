@@ -4,7 +4,7 @@
             [goog.style :as gstyle]
             [goog.dom.query :as query]
             [goog.dom.forms :as forms]
-            [good.dom.classes :as classes]
+            [goog.dom.classes :as classes]
             [pinot.util.clj :as pclj]
             [pinot.util.js :as pjs])
   (:refer-clojure :exclude [replace]))
