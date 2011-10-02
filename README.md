@@ -115,7 +115,7 @@ Pinot also includes a set of functions for creating visualizations in the style 
 ```clojure
 (ns playground.client.test
   (:require [pinot.dom :as dom]
-            [pinot.visual :as vis])
+            [pinot.draw.visualization :as vis])
   (:require-macros [pinot.macros :as mac]))
 
 (def items (range 0 10))
