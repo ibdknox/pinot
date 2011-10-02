@@ -11,7 +11,7 @@ For an example look at the examples/todo.cljs
 From any leiningen project file:
 
 ```clojure
-[pinot "0.1.0-SNAPSHOT"]
+[pinot "0.1.1-SNAPSHOT"]
 ```
 Then make sure you have your lib folder on your classpath.
 
