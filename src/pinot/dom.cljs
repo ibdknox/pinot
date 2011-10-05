@@ -4,8 +4,10 @@
             [goog.style :as gstyle]
             [goog.dom.query :as query]
             [goog.dom.forms :as forms]
+            [goog.dom.classes :as classes]
             [pinot.util.clj :as pclj]
-            [pinot.util.js :as pjs]))
+            [pinot.util.js :as pjs])
+  (:refer-clojure :exclude [replace]))
 
 ;; ********************************************
 ;; Pinot specific
@@ -28,6 +30,9 @@
     :else (doseq [el (pclj/->coll elem)]
             (gstyle/setStyle el (name k) (name v))))
   elem)
+
+(defn toggle-class [elem class]
+  (classes/toggle elem class))
 
 (defn attr 
   ([elem attrs]
@@ -84,6 +89,12 @@
 (defn unappend [elem]
   (doseq [elem (pclj/->coll elem)]
     (dom/removeNode elem)))
+
+(defn replace [elem html]
+  (let [p (parent (if (coll? elem) (first elem) elem))]
+    (unappend elem)
+    (append p html)))
+
 
 (defn nodelist->coll [nl]
     ;; The results are a nodelist, which looks like an array, but
