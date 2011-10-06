@@ -45,7 +45,6 @@
         body-elem (get-body)]
     (doseq [el (pclj/->coll elem)]
       (let [parsed (->target el)]
-        (pjs/log parsed)
         (events/listen body-elem
                        event
                        (make-listener func parsed))))
