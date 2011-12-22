@@ -1,4 +1,4 @@
-### Pinot is still very alpha symbol names and the general shape of the API are still likely to change
+### Pinot is still very alpha, symbol names and the general shape of the API are still likely to change
 
 ##Pinot
 Pinot is a ClojureScript client-side framework designed to make it easy to write your websites completely in Clojure.
@@ -37,7 +37,7 @@ Pinot includes a basic set of dom interaction pieces, including an implementatio
 Pinot also includes `(defpartial)` like in Noir, however Pinot derives even greater advantage from it:
 
 ```clojure
-(mac/defpartial todo [{:keys [done? text]}]
+(pm/defpartial todo [{:keys [done? text]}]
   [:li
    [:h2 t]
    [:span {:class (when done? "done")}]])
@@ -116,15 +116,15 @@ Pinot also includes a set of functions for creating visualizations in the style 
 (ns playground.client.test
   (:require [pinot.dom :as dom]
             [pinot.draw.visualization :as vis])
-  (:require-macros [pinot.macros :as mac]))
+  (:require-macros [pinot.macros :as pm]))
 
 (def items (range 0 10))
 
 ;;For SVG we have to namespace our elements
-(mac/defpartial canvas []
+(pm/defpartial canvas []
                 [:svg:svg {:width 800 :height 400}])
 
-(mac/defpartial item [x]
+(pm/defpartial item [x]
                 [:svg:circle {:r (* 2 x)}])
 
 (dom/append (dom/query "#wrapper")
