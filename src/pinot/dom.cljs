@@ -33,12 +33,13 @@
 
 (defn attr 
   ([elem attrs]
-   (if-not (map? attrs)
-     (. elem (getAttribute (name attrs)))
-     (do
-       (doseq [[k v] attrs]
-         (attr elem k v))
-       elem)))
+   (when elem 
+     (if-not (map? attrs)
+       (. elem (getAttribute (name attrs)))
+       (do
+         (doseq [[k v] attrs]
+           (attr elem k v))
+         elem))))
   ([elem k v]
    (doseq [el (pclj/->coll elem)]
      (. el (setAttribute (name k) v)))

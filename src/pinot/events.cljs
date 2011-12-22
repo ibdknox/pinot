@@ -39,9 +39,9 @@
         (func match e)
         true))))
 
+
 (defn on [elem event func]
-  (let [ev-name (string/upper-case (name event))
-        event (aget events/EventType ev-name)
+  (let [event (string/lower-case (name event))
         body-elem (get-body)]
     (doseq [el (pclj/->coll elem)]
       (let [parsed (->target el)]
