@@ -34,7 +34,7 @@
 
 (defn make-listener [func parsed]
   (fn [e]
-    (let [target (.target e)]
+    (let [target (.-target e)]
       (if-let [match (match? parsed target)]
         (func match e)
         true))))

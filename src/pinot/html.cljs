@@ -26,7 +26,7 @@
                   ;;TODO: there's a bug in clojurescript that prevents seqs from
                   ;; being considered collections
                   (seq? c) (as-content parent c)
-                  (.nodeName c) c)]
+                  (.-nodeName c) c)]
       (when child
         (gdom/appendChild parent child)))))
 
