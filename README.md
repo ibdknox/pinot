@@ -1,4 +1,4 @@
-### Pinot is still very alpha, symbol names and the general shape of the API are still likely to change
+### Pinot has been broken apart. See the announcement here: https://groups.google.com/d/topic/clj-noir/wsCVajG0-YE/discussion
 
 ##Pinot
 Pinot is a ClojureScript client-side framework designed to make it easy to write your websites completely in Clojure.
