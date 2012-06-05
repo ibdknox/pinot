@@ -67,14 +67,14 @@
                elem)]
     (gclass/has elem cls)))
 
-(defn add-class [elem cls]
+(defn add-class [elem & clses]
   (doseq [el (pclj/->coll elem)]
-    (gclass/add el cls))
+    (apply gclass/add el clses))
   elem)
 
-(defn remove-class [elem cls]
+(defn remove-class [elem & clses]
   (doseq [el (pclj/->coll elem)]
-    (gclass/remove el cls))
+    (apply gclass/remove el clses))
   elem)
 
 (defn toggle-class [elem cls]
