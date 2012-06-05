@@ -18,7 +18,7 @@
   (swap! todos dissoc id))
 
 (pm/defpartial todo-item [[id item]]
-            [:li (tags/link-to {:class "remove" :id id} "#" item)])
+            [:li {:id id} (tags/link-to {:class "remove"} "#" item)])
 
 (pm/defpartial todo-form []
             (tags/form-to {:id "todoForm"} [:post "/todos"]
